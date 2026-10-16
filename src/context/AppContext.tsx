@@ -37,11 +37,7 @@ import {
   UpdateExpenseInput,
   UpdateOrderInput,
   } from '../types';
-import {
-  INITIAL_EMPLOYEES, INITIAL_CUSTOMERS, INITIAL_PRODUCTS,
-  INITIAL_COMBOS, INITIAL_OFFERS, INITIAL_SUPPLIERS, INITIAL_EXPENSES,
-  INITIAL_ORDERS, DEFAULT_SETTINGS, INITIAL_NOTIFICATIONS, INITIAL_SALARIES
-} from '../data/mockData';
+
 import { supabase } from '../lib/supabase';
 import { categoryService } from '../services/categoryService';
 import { productService } from '../services/productService';
@@ -538,9 +534,11 @@ const [
       }
       return stored;
     }
-    return DEFAULT_SETTINGS;
+    // Settings are fetched from Supabase by refreshSettings after authentication.
+    // This is a temporary initial value, not seeded store data.
+    return {} as StoreSettings;
   });
-  const [notifications, setNotifications] = useState<NotificationItem[]>(() => getStored('notifications', INITIAL_NOTIFICATIONS));
+  const [notifications, setNotifications] = useState<NotificationItem[]>(() => getStored<NotificationItem[]>('notifications', []));
   const [cashierPermissions, setCashierPermissions] = useState<{ [key: string]: boolean }>(() => {
     const saved = localStorage.getItem('kaanthaaram_cashier_permissions');
     if (saved) {
