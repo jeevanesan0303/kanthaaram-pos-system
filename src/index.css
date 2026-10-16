@@ -1,0 +1,293 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Outfit", sans-serif;
+  --font-serif: "Playfair Display", serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+@media print {
+  @page {
+    margin: 0;
+  }
+
+  html,
+  body,
+  #root {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+  }
+
+  /* Hide the application, but keep its layout from clipping the receipt. */
+  body * {
+    visibility: hidden !important;
+  }
+
+  #printable-receipt,
+  #printable-receipt * {
+    visibility: visible !important;
+  }
+
+  /* Remove every modal size/scroll restriction while printing. */
+  .receipt-modal-overlay,
+  .receipt-modal-card,
+  .receipt-preview-scroll {
+    position: static !important;
+    inset: auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+  }
+
+  /* Receipt container centered on thermal roll without absolute left pinning */
+  #printable-receipt {
+    position: relative !important;
+    display: block !important;
+    width: 72mm !important;
+    min-width: 0 !important;
+    max-width: 72mm !important;
+
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+
+    margin: 0 auto !important;
+    padding: 1mm 1.5mm !important;
+    overflow: visible !important;
+    box-sizing: border-box !important;
+
+    background: #ffffff !important;
+    color: #000000 !important;
+
+    transform: none !important;
+    zoom: 1 !important;
+  }
+
+  #printable-receipt,
+  #printable-receipt * {
+    color: #000000 !important;
+  }
+
+  /* Keep the four receipt columns visible. */
+  #printable-receipt table {
+    width: 100% !important;
+    min-width: 0 !important;
+    table-layout: fixed !important;
+    border-collapse: collapse !important;
+  }
+
+  #printable-receipt th,
+  #printable-receipt td {
+    padding: 2px 1px !important;
+    vertical-align: top !important;
+  }
+
+  /* Item name may wrap; Qty / Price / Total must remain readable. */
+  #printable-receipt th:first-child,
+  #printable-receipt td:first-child {
+    width: 44% !important;
+    text-align: left !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+  }
+
+  #printable-receipt th:nth-child(2),
+  #printable-receipt td:nth-child(2) {
+    width: 12% !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+  }
+
+  #printable-receipt th:nth-child(3),
+  #printable-receipt td:nth-child(3) {
+    width: 22% !important;
+    text-align: right !important;
+    white-space: nowrap !important;
+  }
+
+  #printable-receipt th:nth-child(4),
+  #printable-receipt td:nth-child(4) {
+    width: 22% !important;
+    text-align: right !important;
+    white-space: nowrap !important;
+  }
+
+  #printable-receipt .receipt-meta-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: baseline !important;
+    gap: 4px !important;
+    width: 100% !important;
+  }
+
+  #printable-receipt .receipt-meta-row > span {
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    overflow-wrap: normal !important;
+  }
+
+  #printable-receipt table,
+  #printable-receipt tr,
+  #printable-receipt td,
+  #printable-receipt th,
+  #printable-receipt img {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .no-print,
+  .receipt-controls,
+  .receipt-actions {
+    display: none !important;
+  }
+}
+
+
+
+/* =========================================================
+   APPLICATION LIGHT / DARK THEME
+   ========================================================= */
+:root {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body,
+html.dark #root,
+html.dark .app-shell {
+  background: #0b1210 !important;
+  color: #e5eee9 !important;
+}
+
+/* Main page surfaces */
+html.dark [class*="bg-[#FAF7F2]"],
+html.dark [class*="bg-[#FAF4E8]"] {
+  background-color: #0b1210 !important;
+}
+html.dark .bg-white { background-color: #111a17 !important; }
+html.dark .bg-gray-50 { background-color: #17211e !important; }
+html.dark .bg-gray-100 { background-color: #1d2925 !important; }
+html.dark .bg-amber-50,
+html.dark [class*="bg-amber-50/"] { background-color: rgba(68, 50, 14, .32) !important; }
+html.dark .bg-red-50,
+html.dark [class*="bg-red-50/"] { background-color: rgba(69, 10, 10, .30) !important; }
+html.dark .bg-emerald-50,
+html.dark [class*="bg-emerald-50/"] { background-color: rgba(6, 78, 59, .25) !important; }
+html.dark .bg-blue-50,
+html.dark [class*="bg-blue-50/"] { background-color: rgba(23, 50, 92, .28) !important; }
+
+/* Text */
+html.dark .text-gray-900,
+html.dark .text-gray-800,
+html.dark .text-gray-700 { color: #edf5f1 !important; }
+html.dark .text-gray-600,
+html.dark .text-gray-500 { color: #a9b8b1 !important; }
+html.dark .text-gray-400 { color: #84958d !important; }
+html.dark .text-amber-950 { color: #fde9a9 !important; }
+html.dark .text-amber-900 { color: #f9dc86 !important; }
+
+/* Borders */
+html.dark .border-gray-100,
+html.dark .border-gray-200,
+html.dark .border-gray-300 { border-color: #2b3933 !important; }
+html.dark [class*="border-amber-100/"] { border-color: rgba(217, 154, 31, .24) !important; }
+
+/* Form controls */
+html.dark input,
+html.dark select,
+html.dark textarea {
+  background-color: #121d19 !important;
+  color: #edf5f1 !important;
+  border-color: #31413a !important;
+}
+html.dark input::placeholder,
+html.dark textarea::placeholder { color: #75877e !important; }
+
+/* Tables */
+html.dark table { color: #e7f0ec; }
+html.dark thead { background-color: #16211d !important; }
+html.dark tbody tr { border-color: #26352f !important; }
+html.dark tbody tr:hover { background-color: #16221e !important; }
+
+/* Header + menus */
+html.dark header.bg-white { background-color: #0f1815 !important; border-color: #27362f !important; }
+html.dark .theme-toggle { background-color: #15201c !important; color: #dce9e3 !important; border-color: #2d3d36 !important; }
+html.dark .theme-toggle:hover { background-color: #1d2b26 !important; color: #ffffff !important; }
+
+/* Cards, dropdowns and modals */
+html.dark .shadow-xl,
+html.dark .shadow-lg,
+html.dark .shadow-md,
+html.dark .shadow-sm,
+html.dark .shadow-xs,
+html.dark .shadow-2xs { --tw-shadow-color: rgba(0,0,0,.45) !important; }
+
+/* Theme chooser */
+html.dark .theme-card { background-color: #101a16 !important; border-color: #2b3b34 !important; }
+html.dark .theme-option { color: #edf5f1 !important; }
+
+/* Scrollbar */
+html.dark * { scrollbar-color: #395048 #101714; }
+
+/* Never affect receipt printing. */
+@media print {
+  html.dark body,
+  html.dark #root,
+  html.dark #printable-receipt,
+  html.dark #printable-receipt * {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+}
+.kanthaaram-sidebar {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.kanthaaram-sidebar:hover {
+  scrollbar-color: #0b7650 #031d13;
+}
+
+.kanthaaram-sidebar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.kanthaaram-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.kanthaaram-sidebar::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 20px;
+}
+
+.kanthaaram-sidebar:hover::-webkit-scrollbar-thumb {
+  background: #0b7650;
+}
+
+.kanthaaram-sidebar:hover::-webkit-scrollbar-thumb:hover {
+  background: #f9c032;
+}
+

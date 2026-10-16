@@ -1,0 +1,6 @@
+{
+  "name": "Kaanthaaram Tea POS",
+  "description": "Premium Tea Shop POS & Management System for Kaanthaaram Tea",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
