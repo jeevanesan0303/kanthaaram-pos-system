@@ -250,7 +250,20 @@ export interface CreateOrderInput {
   notes?: string;
 }
 
+export interface OrderEditLine {
+  itemId?: string;
+  productId: string | null;
+  name: string;
+  quantity: number;
+  price: number;
+  notes?: string;
+}
+
 export interface UpdateOrderInput {
+  items?: OrderEditLine[];
+  discount?: number;
+  original?: Order;
+  requestId?: string;
   customerName: string;
   customerPhone?: string;
   orderType: OrderType;
@@ -377,6 +390,8 @@ export interface UpdateExpenseInput {
 }
 
 export interface OrderItem {
+  itemId?: string;
+  productId?: string | null;
   product: Product;
   quantity: number;
   price: number;
@@ -404,6 +419,7 @@ export type PaymentStatus =
 
 export interface Order {
   id: string;
+  customerId?: string | null;
   customerName: string;
   customerPhone?: string;
   items: OrderItem[];

@@ -1,32 +1,14 @@
+import React from 'react';
 import {
-  LayoutDashboard,
-  ShoppingBag,
-  ClipboardList,
-  Users,
-  Package,
-  Layers,
-  Tag,
-  Truck,
-  UserCheck,
-  BarChart3,
-  Receipt,
-  Settings,
-  LogOut,
-  CupSoda,
-  Wallet,
-  PackageCheck,
-  ArchiveX,
-  Menu,
-  PanelLeftClose
+  LayoutDashboard, ShoppingBag, ClipboardList, Users, Package,
+  Layers, Tag, Truck, UserCheck, BarChart3, Receipt, Settings,
+  LogOut, CupSoda, Wallet, PackageCheck, ArchiveX
 } from 'lucide-react';
-
-import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { ActiveView } from '../../types';
 import logoImg from '../../assets/logo.jpg';
 
 export const Sidebar: React.FC = () => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const { currentUser, activeView, setActiveView, cashierPermissions, logout } = useApp();
 
   console.log('CASHIER PROFILE:', {
@@ -138,136 +120,81 @@ const filteredNavItems = navItems.filter(
 );
 
   return (
-    <aside
-  className={`kanthaaram-sidebar bg-[#042418] border-r border-[#0B3D2B] flex flex-col justify-between h-screen sticky top-0 select-none overflow-y-auto overflow-x-hidden shadow-lg transition-all duration-300 ease-in-out ${
-    isCollapsed ? 'w-[72px]' : 'w-60'
-  }`}
->
-      {/* Brand Header */}
-<div
-  className={`p-4 flex items-center border-b border-[#0B3D2B]/60 bg-[#031d13]/50 ${
-    isCollapsed ? 'justify-center' : 'justify-between'
-  }`}
->
-  {!isCollapsed && (
-    <div className="flex items-center gap-2.5 min-w-0">
-      <img
-        src={logoImg}
-        alt="Kanthaaram Logo"
-        className="w-9 h-9 rounded-full object-cover shadow-sm border border-[#0B3D2B] shrink-0"
-      />
+    <aside className="w-60 bg-[#042418] border-r border-[#0B3D2B] flex flex-col justify-between h-screen sticky top-0 select-none overflow-y-auto shrink-0 shadow-xs">
+      <div>
+        {/* Brand Header */}
+        <div className="p-5 flex flex-col items-center justify-center border-b border-[#0B3D2B]/60 bg-[#031d13]/50">
+          <div className="flex items-center gap-2.5">
+            <img
+              src={logoImg}
+              alt="Logo"
+              className="w-9 h-9 rounded-full object-cover shadow-xs border border-[#0B3D2B]"
+            />
+            <div className="flex flex-col">
+              <span className="font-extrabold text-base tracking-tight text-white font-serif leading-none">
+                காந்தாரம்
+              </span>
+            </div>
+          </div>
+        </div>
 
-      <span className="font-extrabold text-base tracking-tight text-white font-serif whitespace-nowrap">
-        காந்தாரம்
-      </span>
-    </div>
-  )}
+        {/* Navigation Section */}
+        <div className="px-3 py-4">
+          <p className="px-3 text-[10px] font-bold text-emerald-400/50 tracking-wider uppercase mb-2">
+            MAIN MENU
+          </p>
+          <nav className="space-y-1">
+            {filteredNavItems.map((item) => {
+              const isActive = activeView === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveView(item.id)}
+                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-[#F9C032] text-amber-950 shadow-xs font-bold'
+                      : 'text-emerald-100/70 hover:bg-[#073623] hover:text-white'
+                  }`}
+                >
+                  <span className={isActive ? 'text-amber-950' : 'text-emerald-300'}>
+                    {item.icon}
+                  </span>
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+        </div>
 
-  <button
-    type="button"
-    onClick={() => setIsCollapsed(!isCollapsed)}
-    title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-    aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-    className="flex items-center justify-center w-9 h-9 shrink-0 rounded-lg text-emerald-300 hover:text-[#F9C032] hover:bg-[#073623] transition-all duration-200 cursor-pointer"
-  >
-    {isCollapsed ? (
-      <Menu className="w-5 h-5" />
-    ) : (
-      <PanelLeftClose className="w-5 h-5" />
-    )}
-  </button>
-</div>
-
-    {/* Navigation Section */}
-<div className={`py-4 ${isCollapsed ? 'px-2' : 'px-3'}`}>
-  {!isCollapsed && (
-    <p className="px-3 text-[10px] font-bold text-emerald-400/50 tracking-wider uppercase mb-2">
-      MAIN MENU
-    </p>
-  )}
-
-  <nav className="space-y-1">
-    {filteredNavItems.map((item) => {
-      const isActive = activeView === item.id;
-
-      return (
-        <button
-          key={item.id}
-          onClick={() => setActiveView(item.id)}
-          title={isCollapsed ? item.label : undefined}
-          className={`w-full flex items-center ${
-            isCollapsed ? 'justify-center px-0' : 'gap-3 px-3.5'
-          } py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer ${
-            isActive
-              ? 'bg-[#F9C032] text-amber-950 shadow-sm font-bold'
-              : 'text-emerald-100/70 hover:bg-[#073623] hover:text-white'
-          }`}
-        >
-          <span
-            className={
-              isActive
-                ? 'text-amber-950 shrink-0'
-                : 'text-emerald-300 shrink-0'
-            }
-          >
-            {item.icon}
-          </span>
-
-          {!isCollapsed && (
-            <span className="truncate">{item.label}</span>
-          )}
-        </button>
-      );
-    })}
-  </nav>
-</div>
+      </div>
 
       {/* Bottom Actions & Profile */}
-<div className={`p-3 space-y-3 ${isCollapsed ? 'px-2' : ''}`}>
-  <button
-    onClick={logout}
-    title={isCollapsed ? 'Logout' : undefined}
-    aria-label="Logout"
-    className={`w-full flex items-center ${
-      isCollapsed ? 'justify-center px-0' : 'gap-3 px-3.5'
-    } py-2.5 rounded-xl text-xs font-bold text-emerald-100/70 hover:bg-red-950/40 hover:text-red-400 transition-all duration-200 cursor-pointer`}
-  >
-    <LogOut className="w-4 h-4 text-emerald-300 shrink-0" />
+      <div className="p-3 space-y-2">
+        <button
+          onClick={logout}
+          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-emerald-100/70 hover:bg-red-950/40 hover:text-red-400 transition-all cursor-pointer"
+        >
+          <LogOut className="w-4 h-4 text-emerald-300" />
+          <span>Logout</span>
+        </button>
 
-    {!isCollapsed && <span>Logout</span>}
-  </button>
-
-  {/* User Info */}
-  <div
-    title={isCollapsed ? currentUser?.name || 'User' : undefined}
-    className={`flex items-center ${
-      isCollapsed ? 'justify-center p-1.5' : 'gap-3 p-2'
-    } bg-[#031d13] rounded-xl border border-[#0B3D2B]`}
-  >
-    <img
-      src={
-        currentUser?.photo ||
-        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200'
-      }
-      alt={currentUser?.name || 'User'}
-      className="w-8 h-8 rounded-full object-cover ring-2 ring-amber-400 shrink-0"
-    />
-
-    {!isCollapsed && (
-      <div className="flex-1 min-w-0">
-        <p className="text-xs font-bold text-white truncate font-sans">
-          {currentUser?.name || 'Arun Kumar'}
-        </p>
-
-        <p className="text-[10px] text-emerald-300/70 truncate">
-          {currentUser?.role === 'Admin'
-            ? 'Administrator'
-            : currentUser?.role || 'Staff'}
-        </p>
+        {/* User Info Bar */}
+        <div className="flex items-center gap-3 p-2 bg-[#031d13] rounded-xl border border-[#0B3D2B]">
+          <img
+            src={currentUser?.photo || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200"}
+            alt={currentUser?.name || "User"}
+            className="w-8 h-8 rounded-full object-cover ring-2 ring-amber-400"
+          />
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-bold text-white truncate font-sans">
+              {currentUser?.name || "Arun Kumar"}
+            </p>
+            <p className="text-[10px] text-emerald-300/70 truncate">
+              {currentUser?.role === 'Admin' ? 'Administrator' : currentUser?.role || 'Staff'}
+            </p>
+          </div>
+        </div>
       </div>
-    )}
-  </div>
-</div>
     </aside>
   );
 };

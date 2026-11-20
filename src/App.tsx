@@ -1,10 +1,8 @@
 import React from 'react';
-import { OfflineBanner } from './components/common/OfflineBanner';
 import { AppProvider, useApp } from './context/AppContext';
 import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
 import { LoginPage } from './components/auth/LoginPage';
-import { ResetPasswordPage } from './components/auth/ResetPasswordPage';
 import { PinLoginModal } from './components/auth/PinLoginModal';
 import { GlobalSearchModal } from './components/common/GlobalSearchModal';
 
@@ -29,7 +27,6 @@ import { ReceiptModal } from './components/pos/ReceiptModal';
 import { ActiveView } from './types';
 import { ThemeProvider } from './context/ThemeContext';
 const AppContent: React.FC = () => {
-  if (window.location.pathname === "/reset-password") return <ResetPasswordPage />;
   const {
   currentUser,
   activeView,
@@ -57,7 +54,6 @@ if (authLoading) {
   if (!currentUser) {
     return (
       <>
-        <OfflineBanner />
         <LoginPage />
         <PinLoginModal />
       </>
@@ -202,7 +198,6 @@ const renderView = () => {
 
   return (
     <div className="app-shell flex h-screen bg-[#FAF7F2] font-sans antialiased text-gray-900 overflow-hidden select-none">
-      <OfflineBanner />
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Header />

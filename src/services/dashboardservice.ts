@@ -70,7 +70,8 @@ export const getDashboardData = async (): Promise<DashboardData> => {
       .gte('created_at', todayStart.toISOString())
       .lt('created_at', tomorrowStart.toISOString())
       .eq('payment_status', 'Paid')
-      .neq('order_status', 'Cancelled'),
+      .neq('order_status', 'Cancelled')
+      .eq('is_deleted', false),
 
     supabase
       .from('orders')
@@ -78,14 +79,16 @@ export const getDashboardData = async (): Promise<DashboardData> => {
       .gte('created_at', yesterdayStart.toISOString())
       .lt('created_at', todayStart.toISOString())
       .eq('payment_status', 'Paid')
-      .neq('order_status', 'Cancelled'),
+      .neq('order_status', 'Cancelled')
+      .eq('is_deleted', false),
 
     supabase
       .from('orders')
       .select('id', { count: 'exact', head: true })
       .gte('created_at', todayStart.toISOString())
       .lt('created_at', tomorrowStart.toISOString())
-      .neq('order_status', 'Cancelled'),
+      .neq('order_status', 'Cancelled')
+      .eq('is_deleted', false),
 
     supabase
       .from('customers')

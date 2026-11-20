@@ -57,20 +57,23 @@
     backdrop-filter: none !important;
   }
 
-  /* Receipt container centered on thermal roll without absolute left pinning */
+  /* Only the bill is taken out of the normal app layout.
+     This prevents the narrow/clipped print shown in preview. */
   #printable-receipt {
-    position: relative !important;
-    display: block !important;
-    width: 72mm !important;
-    min-width: 0 !important;
-    max-width: 72mm !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+
+    width: 80mm !important;
+    min-width: 80mm !important;
+    max-width: 80mm !important;
 
     height: auto !important;
     min-height: 0 !important;
     max-height: none !important;
 
-    margin: 0 auto !important;
-    padding: 1mm 1.5mm !important;
+    margin: 0 !important;
+    padding: 3mm !important;
     overflow: visible !important;
     box-sizing: border-box !important;
 
@@ -81,30 +84,23 @@
     zoom: 1 !important;
   }
 
-  #printable-receipt,
-  #printable-receipt * {
-    color: #000000 !important;
-  }
-
   /* Keep the four receipt columns visible. */
   #printable-receipt table {
     width: 100% !important;
     min-width: 0 !important;
-    table-layout: fixed !important;
+    table-layout: auto !important;
     border-collapse: collapse !important;
   }
 
   #printable-receipt th,
   #printable-receipt td {
-    padding: 2px 1px !important;
-    vertical-align: top !important;
+    white-space: nowrap !important;
   }
 
   /* Item name may wrap; Qty / Price / Total must remain readable. */
   #printable-receipt th:first-child,
   #printable-receipt td:first-child {
-    width: 44% !important;
-    text-align: left !important;
+    width: 46% !important;
     white-space: normal !important;
     word-break: break-word !important;
   }
@@ -113,35 +109,14 @@
   #printable-receipt td:nth-child(2) {
     width: 12% !important;
     text-align: center !important;
-    white-space: nowrap !important;
   }
 
   #printable-receipt th:nth-child(3),
-  #printable-receipt td:nth-child(3) {
-    width: 22% !important;
-    text-align: right !important;
-    white-space: nowrap !important;
-  }
-
+  #printable-receipt td:nth-child(3),
   #printable-receipt th:nth-child(4),
   #printable-receipt td:nth-child(4) {
-    width: 22% !important;
+    width: 21% !important;
     text-align: right !important;
-    white-space: nowrap !important;
-  }
-
-  #printable-receipt .receipt-meta-row {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: baseline !important;
-    gap: 4px !important;
-    width: 100% !important;
-  }
-
-  #printable-receipt .receipt-meta-row > span {
-    white-space: nowrap !important;
-    word-break: keep-all !important;
-    overflow-wrap: normal !important;
   }
 
   #printable-receipt table,
@@ -260,34 +235,3 @@ html.dark * { scrollbar-color: #395048 #101714; }
     color: #000000 !important;
   }
 }
-.kanthaaram-sidebar {
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
-}
-
-.kanthaaram-sidebar:hover {
-  scrollbar-color: #0b7650 #031d13;
-}
-
-.kanthaaram-sidebar::-webkit-scrollbar {
-  width: 5px;
-}
-
-.kanthaaram-sidebar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.kanthaaram-sidebar::-webkit-scrollbar-thumb {
-  background: transparent;
-  border-radius: 20px;
-}
-
-.kanthaaram-sidebar:hover::-webkit-scrollbar-thumb {
-  background: #0b7650;
-}
-
-.kanthaaram-sidebar:hover::-webkit-scrollbar-thumb:hover {
-  background: #f9c032;
-}
-

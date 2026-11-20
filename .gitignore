@@ -6,3 +6,10 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+node_modules/
+dist/
