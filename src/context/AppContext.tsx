@@ -37,7 +37,11 @@ import {
   UpdateExpenseInput,
   UpdateOrderInput,
   } from '../types';
-
+import {
+  INITIAL_EMPLOYEES, INITIAL_CUSTOMERS, INITIAL_PRODUCTS,
+  INITIAL_COMBOS, INITIAL_OFFERS, INITIAL_SUPPLIERS, INITIAL_EXPENSES,
+  INITIAL_ORDERS, DEFAULT_SETTINGS, INITIAL_NOTIFICATIONS, INITIAL_SALARIES
+} from '../data/mockData';
 import { supabase } from '../lib/supabase';
 import { categoryService } from '../services/categoryService';
 import { productService } from '../services/productService';
@@ -60,7 +64,6 @@ import { salaryService } from '../services/salaryService';
 import { expenseService } from '../services/expenseService';
 import { settingsService } from '../services/settingsService';
 import { authService } from '../services/authService';
-import { readOfflineCache, writeOfflineCache, clearOfflineDraft } from '../lib/offlineStorage';
 
 const mapSupplier = (row: any): Supplier => ({
   id: row.id,
@@ -414,7 +417,7 @@ const requestPasswordReset = async (
     await supabase.auth.resetPasswordForEmail(
       cleanEmail,
       {
-        redirectTo: `${window.location.origin}/reset-password`
+        redirectTo: window.location.origin
       }
     );
 
@@ -465,7 +468,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [authLoading, setAuthLoading] =
     useState<boolean>(true);
   const [activeView, setActiveView] = useState<ActiveView>(() => {
-    return 'pos';
+    const user = getStored<Employee | null>('user', null);
+    return user?.role === 'Admin' ? 'dashboard' : 'pos';
   });
   
   const [
@@ -534,11 +538,9 @@ const [
       }
       return stored;
     }
-    // Settings are fetched from Supabase by refreshSettings after authentication.
-    // This is a temporary initial value, not seeded store data.
-    return {} as StoreSettings;
+    return DEFAULT_SETTINGS;
   });
-  const [notifications, setNotifications] = useState<NotificationItem[]>(() => getStored<NotificationItem[]>('notifications', []));
+  const [notifications, setNotifications] = useState<NotificationItem[]>(() => getStored('notifications', INITIAL_NOTIFICATIONS));
   const [cashierPermissions, setCashierPermissions] = useState<{ [key: string]: boolean }>(() => {
     const saved = localStorage.getItem('kaanthaaram_cashier_permissions');
     if (saved) {
@@ -614,7 +616,6 @@ const [
           await productService.getAll();
 
         setProducts(loadedProducts);
-        if (currentUser?.id) await writeOfflineCache(currentUser.id, 'products', loadedProducts);
       } catch (error) {
         const message =
           error instanceof Error
@@ -626,10 +627,6 @@ const [
           message
         );
 
-        if (currentUser?.id) {
-          const cached = await readOfflineCache<Product[]>(currentUser.id, 'products');
-          if (cached) { setProducts(cached); return; }
-        }
         throw new Error(message);
       }
     };
@@ -947,12 +944,6 @@ if (
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session?.user) {
         setCurrentUser(null);
-        setCart([]);
-        setCartDiscount(0);
-        setSelectedCustomer(null);
-        setActiveReceiptOrder(null);
-        setIsPaymentModalOpen(false);
-        setActiveView('pos');
         setAuthLoading(false);
         return;
       }
@@ -982,30 +973,6 @@ if (
       subscription.unsubscribe();
     };
   }, []);
-  const [draftLoadedFor, setDraftLoadedFor] = useState<string | null>(null);
-  // Offline draft only: never treated as a completed sale.
-  useEffect(() => {
-    if (!currentUser?.id) return;
-    let cancelled = false;
-    void readOfflineCache<{cart: OrderItem[]; discount: number; type: OrderType}>(currentUser.id, 'draft')
-      .then(draft => {
-        if (!cancelled && draft && cart.length === 0) {
-          setCart(draft.cart);
-          setCartDiscount(draft.discount);
-          setCartOrderType(draft.type);
-        }
-        if (!cancelled) setDraftLoadedFor(currentUser.id);
-      });
-    return () => { cancelled = true; };
-  }, [currentUser?.id]);
-
-  useEffect(() => {
-    if (!currentUser?.id || draftLoadedFor !== currentUser.id) return;
-    void writeOfflineCache(currentUser.id, 'draft', {
-      cart, discount: cartDiscount, type: cartOrderType,
-    });
-  }, [currentUser?.id, draftLoadedFor, cart, cartDiscount, cartOrderType]);
-
   // Cart actions
   const addToCart = (product: Product) => {
     const finalPrice = getProductPrice(product);
@@ -1094,10 +1061,8 @@ if (
     notes?: string
   ): Promise<void> => {
     if (cart.length === 0) {
-      throw new Error('The cart is empty.');
-    }
-    if (!navigator.onLine) {
-      throw new Error('Offline: your cart is saved as a local draft. Payment cannot be finalized until internet is restored.');
+      alert('The cart is empty.');
+      return;
     }
 
     try {
@@ -1130,10 +1095,9 @@ if (
       setActiveReceiptOrder(savedOrder);
       setIsPaymentModalOpen(false);
       clearCart();
-      if (currentUser?.id) void clearOfflineDraft(currentUser.id);
     } catch (error) {
       console.error('Payment/order save failed:', error);
-      throw error instanceof Error ? error : new Error('Unable to save the order.');
+      alert(error instanceof Error ? error.message : 'Unable to save the order.');
     }
   };
 
@@ -1164,9 +1128,18 @@ if (
     };
   };
 
-  const loginWithPin = (_pin: string, _employeeId?: string): boolean => {
-    // Security: do not grant access by comparing locally available PIN values.
-    // Implement a server-verified PIN flow before enabling this feature.
+  const loginWithPin = (pin: string, employeeId?: string): boolean => {
+    const found = employees.find(e => employeeId ? e.id === employeeId && e.pin === pin : e.pin === pin);
+    if (found) {
+      setCurrentUser(found);
+      if (found.role === 'Admin') {
+        setActiveView('dashboard');
+      } else {
+        setActiveView('pos');
+      }
+      setIsPinModalOpen(false);
+      return true;
+    }
     return false;
   };
 
@@ -1175,22 +1148,10 @@ if (
 
     if (error) {
       console.error('Logout error:', error.message);
-      throw new Error('Unable to sign out. Please try again.');
     }
 
-    // Clear session-scoped POS state only after Supabase confirms sign-out.
     setCurrentUser(null);
     setActiveView('pos');
-    setCart([]);
-    setCartDiscount(0);
-    setCartOrderType('Takeaway');
-    setSelectedCustomer(null);
-    setActiveReceiptOrder(null);
-    setIsPaymentModalOpen(false);
-    setIsPinModalOpen(false);
-    setIsSearchOpen(false);
-    setSearchQuery('');
-    // Held orders remain stored intentionally for recovery across shifts.
   };
 
   const holdCurrentCart = (notes?: string) => {
@@ -1806,37 +1767,20 @@ const deleteCategory = async (
     orderNumber: string,
     updates: UpdateOrderInput
   ): Promise<void> => {
-    await updateOrderInDatabase(orderNumber, updates);
-
-    setOrders(previous =>
-      previous.map(order =>
-        order.id === orderNumber
-          ? {
-              ...order,
-              customerName: updates.customerName.trim() || 'Walk-in Customer',
-              customerPhone: updates.customerPhone?.trim() || '',
-              type: updates.orderType,
-              paymentMethod: updates.paymentMethod,
-              paymentStatus: updates.paymentStatus,
-              notes: updates.notes?.trim() || '',
-            }
-          : order
-      )
-    );
-
-    setActiveReceiptOrder(previous =>
-      previous?.id === orderNumber
-        ? {
-            ...previous,
-            customerName: updates.customerName.trim() || 'Walk-in Customer',
-            customerPhone: updates.customerPhone?.trim() || '',
-            type: updates.orderType,
-            paymentMethod: updates.paymentMethod,
-            paymentStatus: updates.paymentStatus,
-            notes: updates.notes?.trim() || '',
-          }
-        : previous
-    );
+    const savedOrder = await updateOrderInDatabase(orderNumber, updates, products);
+    setOrders(previous => previous.map(order => order.id === orderNumber ? savedOrder : order));
+    setActiveReceiptOrder(previous => previous?.id === orderNumber ? savedOrder : previous);
+    // The transaction has committed. A failed refresh must not be reported as a failed save.
+    const results = await Promise.allSettled([productService.getAll(), customerService.getAll()]);
+    if (results[0].status === 'fulfilled') setProducts(results[0].value);
+    if (results[1].status === 'fulfilled') {
+      const refreshed = results[1].value;
+      setCustomers(refreshed);
+      setSelectedCustomer(previous => previous ? refreshed.find(c => c.id === previous.id) ?? null : null);
+    }
+    if (results.some(result => result.status === 'rejected')) {
+      window.alert('Order saved. Stock/customer refresh failed; refresh the page before the next sale. Do not save the edit again.');
+    }
   };
 
   const updateOrderStatus = async (

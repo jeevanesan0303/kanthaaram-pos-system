@@ -427,39 +427,53 @@ export const Header: React.FC = () => {
         {/* User Dropdown */}
         <div className="relative">
           <button
-            type="button"
-            onClick={() => {
-              setIsUserDropdownOpen(
-                previous => !previous
-              );
+  type="button"
+  onClick={() => {
+    setIsUserDropdownOpen(previous => !previous);
+    setIsNotifOpen(false);
+  }}
+  className="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-xl border transition-all"
+  style={{
+    backgroundColor: theme === 'dark' ? '#172820' : '#f8fafc',
+    borderColor: theme === 'dark' ? '#40594c' : '#cbd5e1',
+  }}
+>
+  <img
+    src={
+      currentUser?.photo ||
+      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200'
+    }
+    alt={currentUser?.name || 'Staff'}
+    className="w-7 h-7 rounded-full object-cover ring-2 ring-amber-400"
+  />
 
-              setIsNotifOpen(false);
-            }}
-            className="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-xl border border-gray-700/60 bg-[#101a16] hover:bg-[#37443e] transition-all duration-200 group"
-          >
-            <img
-              src={
-                currentUser?.photo ||
-                'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200'
-              }
-              alt={
-                currentUser?.name || 'Staff'
-              }
-              className="w-7 h-7 rounded-full object-cover ring-2 ring-amber-400"
-            />
+  <div className="text-left">
+    <span
+      className="text-[10px] block leading-tight font-semibold"
+      style={{
+        color: theme === 'dark' ? '#bdcec4' : '#475569',
+      }}
+    >
+      {currentUser?.role || 'Staff'}
+    </span>
 
-            <div className="text-left">
-              <span className="text-[10px] text-gray-400 group-hover:text-gray-200 block leading-tight font-semibold transition-colors duration-200">
-              {currentUser?.role || 'Staff'}
-            </span>
+    <span
+      className="text-xs font-extrabold leading-tight block"
+      style={{
+        color: theme === 'dark' ? '#ffffff' : '#17251c',
+      }}
+    >
+      {currentUser?.name || 'Staff'}
+    </span>
+  </div>
 
-              <span className="text-xs font-extrabold text-gray-200 group-hover:text-white leading-tight block transition-colors duration-200">
-  {currentUser?.name || 'Staff'}
-</span>
-            </div>
-
-            <ChevronDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-white ml-1 transition-colors duration-200" />
-          </button>
+  <ChevronDown
+    className="w-3.5 h-3.5 ml-1"
+    style={{
+      color: theme === 'dark' ? '#d5e4dc' : '#475569',
+    }}
+  />
+</button>
 
           {isUserDropdownOpen && (
             <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 p-2.5 z-30 animate-in fade-in zoom-in-95 duration-150 space-y-2">

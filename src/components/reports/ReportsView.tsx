@@ -263,14 +263,14 @@ export const ReportsView: React.FC =
 
         const activeCustomerNames = new Set(
           filteredOrders.map((order) =>
-            normalizeText(order.customerName),
+            order.customerId ? `id:${order.customerId}` : normalizeText(order.customerName),
           ),
         );
 
         return customers.filter((customer) =>
           activeCustomerNames.has(
-            normalizeText(customer.name),
-          ),
+            `id:${customer.id}`,
+          ) || activeCustomerNames.has(normalizeText(customer.name)),
         );
       },
       [
@@ -289,9 +289,7 @@ export const ReportsView: React.FC =
       filteredOrders.forEach((order) => {
         if (order.status !== 'Completed') return;
 
-        const key = normalizeText(
-          order.customerName,
-        );
+        const key = order.customerId ? `id:${order.customerId}` : normalizeText(order.customerName);
 
         if (!key) return;
 
@@ -592,14 +590,10 @@ export const ReportsView: React.FC =
                   address:
                     customer.address || '—',
                   orders:
-                    customerSalesStats.get(
-                      normalizeText(customer.name),
-                    )?.orders || 0,
+                    (customerSalesStats.get(`id:${customer.id}`)?.orders || 0) + (customerSalesStats.get(normalizeText(customer.name))?.orders || 0),
                   spent: formatMoney(
                     settings.currency,
-                    customerSalesStats.get(
-                      normalizeText(customer.name),
-                    )?.spent || 0,
+                    (customerSalesStats.get(`id:${customer.id}`)?.spent || 0) + (customerSalesStats.get(normalizeText(customer.name))?.spent || 0),
                   ),
                   status: customer.status,
                   created: getISODate(

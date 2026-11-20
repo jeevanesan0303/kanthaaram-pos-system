@@ -1,3 +1,4 @@
+import { orderEditSnapshot, validateOrderEdit } from '../utils/orderEdit';
 import { supabase } from '../lib/supabase';
 import { Order, Product } from '../types';
 import {
@@ -19,6 +20,7 @@ type OrderItemRow = {
 type OrderRow = {
   id: string;
   order_number: string;
+  customer_id: string | null;
   customer_name: string;
   customer_phone: string | null;
   subtotal: number | string;
@@ -39,6 +41,7 @@ type OrderRow = {
 const ORDER_SELECT = `
   id,
   order_number,
+  customer_id,
   customer_name,
   customer_phone,
   subtotal,
@@ -86,13 +89,16 @@ const mapOrder = (row: OrderRow, products: Product[]): Order => {
 
   return {
     id: row.order_number,
+    customerId: row.customer_id,
     customerName: row.customer_name,
     customerPhone: row.customer_phone ?? '',
 
     items: (row.order_items ?? []).map(item => ({
+      itemId: item.id,
+      productId: item.product_id,
       product:
-        products.find(product => product.id === item.product_id) ??
-        fallbackProduct(item),
+        { ...(products.find(product => product.id === item.product_id) ?? fallbackProduct(item)),
+          name: item.product_name },
 
       quantity: Number(item.quantity),
       price: Number(item.unit_price),
@@ -166,6 +172,7 @@ export const getOrders = async (
   const { data, error } = await supabase
     .from('orders')
     .select(ORDER_SELECT)
+    .eq('is_deleted', false)
     .order('created_at', {
       ascending: false,
     });
@@ -273,62 +280,30 @@ export const createOrder = async (
 export const updateOrder = async (
   orderNumber: string,
   updates: UpdateOrderInput,
-): Promise<void> => {
-  const { data, error } = await supabase
-    .from('orders')
-    .update({
-      customer_name:
-        updates.customerName.trim() ||
-        'Walk-in Customer',
-
-      customer_phone:
-        updates.customerPhone?.trim() ||
-        null,
-
-      order_type:
-        updates.orderType,
-
-      payment_method:
-        updates.paymentMethod,
-
-      payment_status:
-        updates.paymentStatus,
-
-      notes:
-        updates.notes?.trim() ||
-        null,
-    })
-
-    /*
-     * Frontend Order.id contains
-     * human readable order number.
-     *
-     * Example:
-     * #KT00001
-     *
-     * Supabase orders.id is UUID.
-     */
-
-    .eq(
-      'order_number',
-      orderNumber,
-    )
-
-    .select(
-      'id, order_number',
-    )
-
-    .maybeSingle();
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  if (!data) {
-    throw new Error(
-      `Order ${orderNumber} was not found or you do not have permission to update it.`,
-    );
-  }
+  products: Product[],
+): Promise<Order> => {
+  validateOrderEdit(updates);
+  const { data, error } = await supabase.rpc('edit_completed_pos_order', {
+    p_order_number: orderNumber,
+    p_request_id: updates.requestId,
+    p_expected: orderEditSnapshot(updates.original!),
+    p_header: {
+      customer_name: updates.customerName.trim(),
+      customer_phone: updates.customerPhone?.trim() || null,
+      order_type: updates.orderType,
+      payment_method: updates.paymentMethod,
+      payment_status: updates.paymentStatus,
+      notes: updates.notes?.trim() || null,
+      discount: updates.discount,
+    },
+    p_items: updates.items!.map(item => ({
+      id: item.itemId || null, product_id: item.productId,
+      quantity: item.quantity, unit_price: item.price, notes: item.notes?.trim() || null,
+    })),
+  });
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error('No save confirmation received. Refresh the order before retrying.');
+  return mapOrder(data as OrderRow, products);
 };
 
 /* =========================================================

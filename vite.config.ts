@@ -6,8 +6,6 @@ import {defineConfig} from 'vite';
 export default defineConfig(() => {
   return {
     plugins: [react(), tailwindcss()],
-      esbuild: { pure: ['console.log', 'console.info', 'console.debug'] },
-    build: { sourcemap: false },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

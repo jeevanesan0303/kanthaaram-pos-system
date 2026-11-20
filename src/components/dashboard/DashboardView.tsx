@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { getDashboardData } from '../../services/dashboardservice';
+import { SalesOverviewChart } from './SalesOverviewChart';
 import {
   DashboardData,
   Order,
@@ -85,7 +86,7 @@ const [dashboardError, setDashboardError] =
     mounted = false;
   };
 }, [
-  orders.length,
+  orders,
   customers.length,
   products.length,
   offers.length,
@@ -435,119 +436,10 @@ const activeOffers = offers.filter(
       {/* Sales Chart & Recent Orders Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Sales Chart */}
-        <div className="lg:col-span-2 bg-white rounded-2xl p-5 border border-gray-100 shadow-2xs flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-extrabold text-sm text-gray-900 font-serif">Sales Overview</h3>
-            <select
-              value={timeframe}
-              onChange={(e) => setTimeframe(e.target.value as any)}
-              className="text-xs font-bold text-gray-750 bg-gray-50 px-2.5 py-1.5 rounded-xl border border-gray-200 outline-none cursor-pointer focus:ring-1 focus:ring-emerald-500"
-            >
-              <option value="Today">Today</option>
-              <option value="This Week">This Week</option>
-              <option value="This Month">This Month</option>
-            </select>
-          </div>
-
-          {/* SVG Line Graph */}
-          <div className="h-52 w-full relative pt-4 flex gap-3">
-            {/* Y-Axis Labels */}
-            <div className="flex flex-col justify-between text-[9px] font-bold text-gray-400 h-32.5 text-right w-12 select-none pr-1.5 border-r border-gray-100">
-              {currentChart.yLabels.map((lbl, idx) => (
-                <span key={idx}>{lbl}</span>
-              ))}
-            </div>
-            
-            <div className="flex-1 relative">
-              {/* Tooltip Overlay */}
-              {hoveredPoint && (
-                <div 
-                  className="absolute bg-gray-900/95 backdrop-blur-xs text-white text-[10px] font-bold px-2.5 py-1.5 rounded-xl shadow-lg pointer-events-none transition-all duration-150 -translate-x-1/2 -translate-y-full z-20 flex flex-col items-center border border-gray-800"
-                  style={{ 
-                    left: `${(hoveredPoint.x / 500) * 100}%`, 
-                    top: `${(hoveredPoint.y / 170) * 100}%`,
-                    marginTop: '-12px'
-                  }}
-                >
-                  <span className="text-[8px] text-gray-400 uppercase tracking-wide">{hoveredPoint.label}</span>
-                  <span className="font-mono text-emerald-400 mt-0.5">{hoveredPoint.value}</span>
-                  <div className="w-1.5 h-1.5 bg-gray-900 rotate-45 mt-1 -mb-2 border-r border-b border-gray-800"></div>
-                </div>
-              )}
-
-              <svg className="w-full h-full overflow-visible" viewBox="0 0 500 170">
-                <defs>
-                  <linearGradient id="emeraldGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#059669" stopOpacity="0.3" />
-                    <stop offset="100%" stopColor="#059669" stopOpacity="0.0" />
-                  </linearGradient>
-                </defs>
-                {/* Background Grid Lines */}
-                <line x1="0" y1="10" x2="500" y2="10" stroke="#F3F4F6" strokeDasharray="4" />
-                <line x1="0" y1="50" x2="500" y2="50" stroke="#F3F4F6" strokeDasharray="4" />
-                <line x1="0" y1="90" x2="500" y2="90" stroke="#F3F4F6" strokeDasharray="4" />
-                <line x1="0" y1="130" x2="500" y2="130" stroke="#E5E7EB" strokeWidth="1" />
-
-                {/* Area Fill */}
-                <path
-                  d={currentChart.areaPath}
-                  fill="url(#emeraldGrad)"
-                  className="transition-all duration-300"
-                />
-                {/* Smooth Line */}
-                <path
-                  d={currentChart.linePath}
-                  fill="none"
-                  stroke="#059669"
-                  strokeWidth="3.5"
-                  strokeLinecap="round"
-                  className="transition-all duration-300"
-                />
-                {/* Data Points */}
-                {currentChart.points.map((pt, i) => (
-                  <g key={i}>
-                    {/* Hover hotspot (larger invisible circle for easy mouse target) */}
-                    <circle
-                      cx={pt.x}
-                      cy={pt.y}
-                      r="14"
-                      fill="transparent"
-                      className="cursor-pointer"
-                      onMouseEnter={() => setHoveredPoint(pt)}
-                      onMouseLeave={() => setHoveredPoint(null)}
-                    />
-                    {/* Visible circle */}
-                    <circle
-                      cx={pt.x}
-                      cy={pt.y}
-                      r={hoveredPoint?.x === pt.x && hoveredPoint?.y === pt.y ? "7" : "5"}
-                      fill={hoveredPoint?.x === pt.x && hoveredPoint?.y === pt.y ? "#059669" : "#FFFFFF"}
-                      stroke="#059669"
-                      strokeWidth="3"
-                      className="pointer-events-none transition-all duration-150"
-                    />
-                  </g>
-                ))}
-
-                {/* X-axis Labels */}
-                {currentChart.xLabels.map((xl, i) => (
-                  <text
-                    key={i}
-                    x={xl.x}
-                    y="155"
-                    textAnchor="middle"
-                    fill="#9CA3AF"
-                    fontSize="10"
-                    fontWeight="600"
-                    fontFamily="sans-serif"
-                  >
-                    {xl.label}
-                  </text>
-                ))}
-              </svg>
-            </div>
-          </div>
-        </div>
+       <SalesOverviewChart
+  currency={settings.currency}
+  refreshKey={orders}
+/>
 
         {/* Low Stock Alerts List */}
         <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-2xs flex flex-col justify-between">
@@ -616,7 +508,12 @@ const activeOffers = offers.filter(
               <h4 className="font-bold text-xs text-gray-900">Product Management</h4>
               <button 
                 onClick={() => setActiveView('products')}
-                className="px-2.5 py-1 bg-amber-100 text-amber-950 hover:bg-amber-200 text-[10px] font-bold rounded-lg flex items-center gap-1"
+                className="px-2.5 py-1 text-[10px] font-bold rounded-lg flex items-center gap-1 transition-opacity hover:opacity-90"
+style={{
+  backgroundColor: '#fcd34d',
+  color: '#292000',
+  border: '1px solid #d6a514',
+}}
               >
                  View Products
               </button>
@@ -643,7 +540,12 @@ const activeOffers = offers.filter(
               <h4 className="font-bold text-xs text-gray-900">Category Management</h4>
               <button 
                 onClick={() => setActiveView('categories')}
-                className="px-2.5 py-1 bg-amber-100 text-amber-955 hover:bg-amber-200 text-[10px] font-bold rounded-lg flex items-center gap-1"
+                className="px-2.5 py-1 text-[10px] font-bold rounded-lg flex items-center gap-1 transition-opacity hover:opacity-90"
+                style={{
+                  backgroundColor: '#fcd34d',
+                  color: '#292000',
+                  border: '1px solid #d6a514',
+                }}
               >
                 View Categories
               </button>
@@ -667,7 +569,12 @@ const activeOffers = offers.filter(
               <h4 className="font-bold text-xs text-gray-900">Offers Management</h4>
               <button 
                 onClick={() => setActiveView('offers')}
-                className="px-2.5 py-1 bg-amber-100 text-amber-950 hover:bg-amber-200 text-[10px] font-bold rounded-lg flex items-center gap-1"
+                className="px-2.5 py-1 text-[10px] font-bold rounded-lg flex items-center gap-1 transition-opacity hover:opacity-90"
+                style={{
+                  backgroundColor: '#fcd34d',
+                  color: '#292000',
+                  border: '1px solid #d6a514',
+                }}
               >
                  View Offers
               </button>
@@ -697,7 +604,12 @@ const activeOffers = offers.filter(
               <h4 className="font-bold text-xs text-gray-900">Supplier Management</h4>
               <button 
                 onClick={() => setActiveView('suppliers')}
-                className="px-2.5 py-1 bg-amber-100 text-amber-950 hover:bg-amber-200 text-[10px] font-bold rounded-lg flex items-center gap-1"
+                className="px-2.5 py-1 text-[10px] font-bold rounded-lg flex items-center gap-1 transition-opacity hover:opacity-90"
+                style={{
+                  backgroundColor: '#fcd34d',
+                  color: '#292000',
+                  border: '1px solid #d6a514',
+                }}
               >
                  View Suppliers
               </button>
@@ -737,7 +649,12 @@ const activeOffers = offers.filter(
       onClick={() =>
         setActiveView('inventory')
       }
-      className="px-2.5 py-1 bg-red-100 text-red-950 hover:bg-red-200 text-[10px] font-bold rounded-lg flex items-center gap-1"
+      className="px-2.5 py-1 text-[10px] font-bold rounded-lg flex items-center gap-1 transition-opacity hover:opacity-90"
+      style={{
+        backgroundColor: '#f87171',
+        color: '#7f1d1d',
+        border: '1px solid #ef4444',
+      }}
     >
       Manage Stock
     </button>

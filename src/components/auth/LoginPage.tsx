@@ -15,7 +15,7 @@ import { useApp } from '../../context/AppContext';
 import logoImg from '../../assets/logo.jpg';
 
 export const LoginPage: React.FC = () => {
-  const { employees, loginWithCredentials, requestPasswordReset } = useApp();
+  const { employees, loginWithCredentials } = useApp();
 
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -30,27 +30,15 @@ export const LoginPage: React.FC = () => {
   const [resetEmail, setResetEmail] = useState('');
   const [resetSuccess, setResetSuccess] = useState('');
 
-  const [resetSending, setResetSending] = useState(false);
-  const [resetError, setResetError] = useState('');
-
-  const handleResetSubmit = async (e: React.FormEvent) => {
+  const handleResetSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (resetSending || !resetEmail.trim()) return;
-    setResetSending(true);
-    setResetError('');
-    setResetSuccess('');
-    try {
-      const result = await requestPasswordReset(resetEmail.trim());
-      if (!result.success) {
-        setResetError(result.message);
-        return;
-      }
-      setResetSuccess(result.message);
-    } catch (error) {
-      setResetError(error instanceof Error ? error.message : 'Could not request password reset.');
-    } finally {
-      setResetSending(false);
-    }
+    if (!resetEmail) return;
+    setResetSuccess(`A password reset link has been successfully sent to ${resetEmail}!`);
+    setTimeout(() => {
+      setResetSuccess('');
+      setResetEmail('');
+      setIsForgotOpen(false);
+    }, 3000);
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -239,7 +227,6 @@ export const LoginPage: React.FC = () => {
               </div>
             ) : (
               <form onSubmit={handleResetSubmit} className="space-y-4 text-left">
-                {resetError && <p role="alert" className="text-xs font-semibold text-red-600">{resetError}</p>}
                 <div>
                   <label className="text-[11px] font-bold text-gray-700 block mb-1">Email Address</label>
                   <div className="relative">
@@ -267,7 +254,7 @@ export const LoginPage: React.FC = () => {
                     Cancel
                   </button>
                   <button
-                    type="submit" disabled={resetSending}
+                    type="submit"
                     className="flex-1 py-2.5 bg-[#2D7D46] hover:bg-[#236337] text-white font-extrabold text-xs rounded-xl shadow-md transition-colors cursor-pointer"
                   >
                     Send Reset Link
